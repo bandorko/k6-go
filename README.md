@@ -4,7 +4,9 @@ k6-go makes it easy to run load tests written in golang with k6
 
 ## build
 
+```bash
 go build cmd/k6-go/k6-go.go
+```
 
 ## example
 
