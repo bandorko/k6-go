@@ -9,6 +9,8 @@ builds:
     goos:
       - linux
       - windows
+    goarch: 
+      - amd64
 
 archives:
   - format: tar.gz
