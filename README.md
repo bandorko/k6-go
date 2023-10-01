@@ -1,6 +1,6 @@
 # k6-go
 
-k6-go makes it easy to run load tests written in golang with k6
+k6-go makes it easy to run load tests written in golang with k6. To achieve this it uses [xk6](https://github.com/grafana/xk6) and the [xk6-g0](https://github.com/szkiba/xk6-g0) extension.
 
 ## build
 
