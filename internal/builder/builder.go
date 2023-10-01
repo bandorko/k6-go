@@ -84,7 +84,7 @@ func Build(filename string, out string) error {
 	if err != nil {
 		return err
 	}
-	//os.RemoveAll(tempDir)
+	os.RemoveAll(tempDir)
 	return nil
 }
 
