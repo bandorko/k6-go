@@ -2,6 +2,18 @@
 
 k6-go makes it easy to run load tests written in golang with k6. To achieve this it uses [xk6](https://github.com/grafana/xk6) and the [xk6-g0](https://github.com/szkiba/xk6-g0) extension.
 
+## the problem
+
+Although k6's officially supported scripting language is JavaScript, since xk6-g0 was born, writing scripts in golang became possible. xk6-go can handle simple go scripts out of the box with the help of [yaegi](https://github.com/traefik/yaegi) interpreter, but if you want to use subpackages, or 3rd party packages (like a generated openapi client), the situation became harder. It is possible, to install additional packages to the yaegi interpreter (described [here](https://github.com/szkiba/xk6-g0#extending-xk6-g0)), but the procedure is not developer friendly.
+
+## the solution
+
+k6-go detects the dependencies of the go script, and generates the extension, that uses the RegisterExports function of xk6-go, to build the needed packages into a custom k6 image on the fly.
+
+## parameters
+
+k6-go passes all the parameters to the generated custom k6 image.
+
 ## build
 
 ```bash
