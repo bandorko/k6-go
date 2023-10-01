@@ -17,7 +17,7 @@ k6-go passes all the parameters to the generated custom k6 image.
 ## build
 
 ```bash
-go build cmd/k6-go/k6-go.go
+go build k6-go.go
 ```
 
 ## example
