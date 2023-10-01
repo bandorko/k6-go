@@ -5,6 +5,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"runtime"
 
 	"github.com/bandorko/k6-go/internal/builder"
 	"github.com/bandorko/k6-go/internal/fs"
@@ -17,7 +18,7 @@ func main() {
 		log.Fatalln(err)
 	}
 	defer os.RemoveAll(tempDir)
-	customK6File := filepath.Join(tempDir, "custom-k6")
+	customK6File := filepath.Join(tempDir, getCustomK6FileName())
 	err = builder.Build(filename, customK6File)
 	if err != nil {
 		log.Fatalln(err)
@@ -26,13 +27,15 @@ func main() {
 	cmd := exec.Command(customK6File, os.Args[1:]...)
 	cmd.Stdout = os.Stdout
 	cmd.Stderr = os.Stderr
-	cmd.Run()
-
-	/*	out, err := exec.RunCommand(context.Background(), 0, tempDir, customK6File, os.Args[1:]...)
-		log.Println(out)
+	err = cmd.Run()
+	if err != nil {
 		log.Fatalln(err)
-		if err != nil {
-			log.Println(out)
-			log.Fatalln(err)
-		}*/
+	}
+}
+
+func getCustomK6FileName() string {
+	if runtime.GOOS == "windows" {
+		return "custom-k6.exe"
+	}
+	return "custom-k6"
 }
