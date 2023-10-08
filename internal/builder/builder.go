@@ -2,6 +2,7 @@ package builder
 
 import (
 	"context"
+	"fmt"
 	"go/parser"
 	"go/token"
 	"log"
@@ -36,12 +37,28 @@ func init() {
 `
 
 //Build builds the custom k6 binary including all the needed libraries for running the given go script.
-func Build(filename string, out string) error {
+func Build(filename string, out string, silent bool) error {
+
+	origStrdOut := os.Stdout
+	origStrdErr := os.Stderr
+	origLogOutput := log.Writer()
+	defer func() {
+		os.Stdout = origStrdOut
+		os.Stderr = origStrdErr
+		log.SetOutput(origLogOutput)
+	}()
+	if silent {
+		if null, err := os.OpenFile(os.DevNull, os.O_WRONLY, 0); err == nil {
+			os.Stderr = null
+			os.Stdout = null
+			log.SetOutput(os.Stderr)
+		}
+	}
 	externalImports, err := collectExternalImports(filename)
 	if err != nil {
 		return err
 	}
-	log.Println("external imports in the script file:", externalImports)
+	fmt.Println("external imports in the script file:", externalImports)
 	tempDir := ""
 	moduleName := ""
 	if len(externalImports) > 0 {
@@ -49,7 +66,6 @@ func Build(filename string, out string) error {
 		if err != nil {
 			return err
 		}
-		log.Println(tempDir)
 
 		moduleDir, err := getModuleDir(filename)
 		if err != nil {
@@ -92,17 +108,18 @@ func collectExternalImports(filename string) ([]string, error) {
 	fset := &token.FileSet{}
 	f, err := parser.ParseFile(fset, filename, nil, parser.ImportsOnly)
 	if err != nil {
-		return nil, err
-	}
-	// Print the imports from the file's AST.
-	externalImports := make([]string, 0)
-	for _, s := range f.Imports {
-		imp := s.Path.Value
-		if strings.Contains(imp, ".") {
-			externalImports = append(externalImports, imp)
+		fmt.Println("Can not parse script file: ", filename)
+		return []string{}, nil
+	} else {
+		externalImports := make([]string, 0)
+		for _, s := range f.Imports {
+			imp := s.Path.Value
+			if strings.Contains(imp, ".") {
+				externalImports = append(externalImports, imp)
+			}
 		}
+		return externalImports, nil
 	}
-	return externalImports, nil
 }
 
 func getModuleDir(filename string) (string, error) {
@@ -173,7 +190,6 @@ func build(modulename string, moduledir string, out string) error {
 		})
 		replacements = append(replacements, xk6.NewReplace(modulename, moduledir))
 	}
-
 	builder := xk6.Builder{
 		Extensions:   extensions,
 		Replacements: replacements,

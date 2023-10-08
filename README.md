@@ -8,16 +8,26 @@ Although k6's officially supported scripting language is JavaScript, since xk6-g
 
 ## the solution
 
-k6-go detects the dependencies of the go script, and generates the extension, that uses the RegisterExports function of xk6-go, to build the needed packages into a custom k6 image on the fly.
+k6-go detects the dependencies of the go script, and generates the extension, that uses the RegisterExports function of xk6-go, to build the needed packages into a custom k6 binary on the fly.
 
-## parameters
-
-k6-go passes all the parameters to the generated custom k6 image.
-
-## build
+## installing k6-go
 
 ```bash
-go build k6-go.go
+go install github.com/bandorko/k6-go@latest
+```
+
+## running test
+
+k6-go runs the custom k6 binary after building it, so you can use k6-go with the same parameters as k6.
+```bash
+k6-go run -i 10 -u 3 script.go
+k6-go help run
+```
+
+
+If you want to build only the custom k6 binary, then you can use the build subcommand
+```bash
+k6-go build --output custom-k6 script.go
 ```
 
 ## example
