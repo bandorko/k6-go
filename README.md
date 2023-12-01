@@ -30,6 +30,16 @@ If you want to build only the custom k6 binary, then you can use the build subco
 k6-go build --output custom-k6 script.go
 ```
 
+## environment variables
+
+k6-go supports the following environment variables of xk6:
+
+- K6_VERSION
+- XK6_K6_REPO
+- XK6_RACE_DETECTOR
+- XK6_SKIP_CLEANUP
+
+More information : https://github.com/grafana/xk6#environment-variables
 ## example
 
 [petstore-load-k6](https://github.com/bandorko/petstore-load-k6) is an example load test project written in golang

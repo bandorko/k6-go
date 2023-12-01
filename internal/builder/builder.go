@@ -36,7 +36,7 @@ func init() {
 }	
 `
 
-//Build builds the custom k6 binary including all the needed libraries for running the given go script.
+// Build builds the custom k6 binary including all the needed libraries for running the given go script.
 func Build(filename string, out string, silent bool) error {
 
 	origStrdOut := os.Stdout
@@ -71,6 +71,7 @@ func Build(filename string, out string, silent bool) error {
 		if err != nil {
 			return err
 		}
+
 		moduleName, err = getModuleName(moduleDir)
 		if err != nil {
 			return err
@@ -153,7 +154,11 @@ func createExportsFile(dir string, externalImports []string) error {
 }
 
 func generate(dir string) error {
-	_, err := exec.RunCommand(context.Background(), 0, dir, "go", "mod", "tidy")
+	_, err := exec.RunCommand(context.Background(), 0, dir, "go", "get", "github.com/szkiba/xk6-g0")
+	if err != nil {
+		return err
+	}
+	_, err = exec.RunCommand(context.Background(), 0, dir, "go", "mod", "tidy")
 	if err != nil {
 		return err
 	}
@@ -177,11 +182,17 @@ func getModuleName(dir string) (string, error) {
 }
 
 func build(modulename string, moduledir string, out string) error {
+	k6Version := os.Getenv("K6_VERSION")
+	k6Repo := os.Getenv("XK6_K6_REPO")
+	raceDetector := os.Getenv("XK6_RACE_DETECTOR") == "1"
+	skipCleanup := os.Getenv("XK6_SKIP_CLEANUP") == "1"
+
 	extensions := []xk6.Dependency{
 		{
 			PackagePath: "github.com/szkiba/xk6-g0",
 			Version:     "latest",
-		}}
+		},
+	}
 	replacements := []xk6.Replace{}
 	if modulename != "" {
 		extensions = append(extensions, xk6.Dependency{
@@ -191,6 +202,10 @@ func build(modulename string, moduledir string, out string) error {
 		replacements = append(replacements, xk6.NewReplace(modulename, moduledir))
 	}
 	builder := xk6.Builder{
+		K6Version:    k6Version,
+		K6Repo:       k6Repo,
+		RaceDetector: raceDetector,
+		SkipCleanup:  skipCleanup,
 		Extensions:   extensions,
 		Replacements: replacements,
 	}
